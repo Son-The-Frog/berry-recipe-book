@@ -1,111 +1,129 @@
 const recipes = [
-    { name: "Honey Glazed Berry Berries", ingredients: "Sweet honey, giant red berries, a pinch of sugar.", category: "General", favorite: false, time: "15 mins", flies: 2 },
-    { name: "Blueberry Morning Porridge", ingredients: "Oats, warm milk, blueberries, and a drizzle of honey.", category: "Foggy Day", favorite: false, time: "10 mins", flies: 5 },
-    { name: "Warm Berry Tea", ingredients: "Dried berries, boiling water, a cinnamon stick.", category: "Foggy Day", favorite: false, time: "5 mins", flies: 1 }
+    { name: "Honey Glazed Berry Berries", ingredients: "Sweet honey, giant red berries, a pinch of sugar.", category: "General", favorite: false, time: "15 mins", flies: 2, steps: ["Mix honey and berries", "Add sugar and stir", "Wait for shine"] },
+    { name: "Blueberry Morning Porridge", ingredients: "Oats, warm milk, blueberries, and a drizzle of honey.", category: "Foggy Day", favorite: false, time: "10 mins", flies: 5, steps: ["Boil milk", "Add oats and blueberries", "Stir in honey"] },
+    { name: "Warm Berry Tea", ingredients: "Dried berries, boiling water, a cinnamon stick.", category: "Foggy Day", favorite: false, time: "5 mins", flies: 1, steps: ["Steep berries in water", "Add cinnamon", "Wait for warmth"] }
 ];
 
 function loadRecipes(filterText = "") {
-    const container = document.getElementById('categories-container');
-    container.innerHTML = '';
+    const categoriesContainer = document.getElementById('categories-container');
+    categoriesContainer.innerHTML = '';
+    
+    const filteredRecipes = recipes.filter(r => 
+        r.name.toLowerCase().includes(filterText.toLowerCase()) || 
+        r.ingredients.toLowerCase().includes(filterText.toLowerCase())
+    );
 
     const categories = [...new Set(recipes.map(r => r.category))];
+    const categoryOrder = { "Foggy Day": 0, "General": 1 };
+    const sortedCategories = categories.sort((a, b) => categoryOrder[a] - categoryOrder[b]);
 
-    categories.forEach(cat => {
+    sortedCategories.forEach(category => {
         const catDiv = document.createElement('div');
-        catDiv.className = `category-section ${cat === 'Foggy Day' ? 'category-foggy' : ''}`;
+        catDiv.className = category === 'Foggy Day' ? 'category-foggy' : 'category-section';
         
-        const title = document.createElement('h3');
+        const title = document.createElement('h2');
         title.className = 'category-title';
-        title.innerText = cat;
+        title.textContent = category;
         catDiv.appendChild(title);
 
         const list = document.createElement('ul');
         list.className = 'recipe-list';
-        
-        recipes.filter(r => r.category === cat && r.name.toLowerCase().includes(filterText.toLowerCase())).
-            // Simple filter for ingredients too
-            .filter(r => r.ingredients.toLowerCase().includes(filterText.toLowerCase()))
-            .forEach(recipe => {
-                const li = document.createElement('li');
-                li.className = 'recipe-item';
-                li.innerHTML = `
-                    <button class="fav-btn ${recipe.favorite ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite(event, '${recipe.name}')">
-                        ${recipe.favorite ? '❤️' : '🤍'}
-                    </button>
-                    <div class="recipe-name">${recipe.name}</div>
-                    <div class="recipe-details">
-                        ${recipe.time} | ${recipe.flies} flies needed
-                    </div>
-                `;
-                li.onclick = () => {
-                    li.classList.add('click-bounce');
-                    setTimeout(() => li.classList.remove('click-bounce'), 300);
-                    li.classList.toggle('active');
-                };
-                
-                list.appendChild(li);
-            });
-
         catDiv.appendChild(list);
-        container.appendChild(catDiv);
-    });
-}
 
-function addRecipe() {
-    const name = document.getElementById('recipe-name').value;
-    const ingredients = document.getElementById('recipe-ingredients').value;
-    const time = document.getElementById('recipe-time').value;
-    const flies = document.getElementById('recipe-flies').value;
-    const category = document.getElementById('recipe-category').value;
+        const categoryRecipes = filteredRecipes.filter(r => r.category === category);
 
-    if (!name || !ingredients) {
-        alert("Please give your berry recipe a name and ingredients!");
-        return;
-    }
+        categoryRecipes.forEach(recipe) => {
+            const li = document.createElement('li');
+            li.className = 'recipe-item';
+            li.innerHTML = `
+                <button class="fav-btn" onclick="toggleFavorite(event, '${recipe.name}')">
+                    ★
+                </button>
+                <div classcategory="recipe-name">${recipe.name}</div>
+                <div class="recipe-details" onclick="toggleDetails(event, '${recipe.name}')">
+                    <p><strong>Ingredients:</strong> ${recipe.ingredients}</p>
+                    <p><strong>Time:</strong> ${recipe.time}</p>
+                    <p><strong>Flies:</strong> ${recipe.flies}</p>
+                    ${recipe.steps ? `<ul class="step-list">${recipe.steps.map(step => `<li class="step-item"><input type="checkbox" class="step-checkbox" onclick="event.stopPropagation()"> ${step}</li>`).join('')}</ul>` : ''}
+                </div>
+            `;
+            li.onclick = (e) => {
+                if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+                    toggleDetails(e, recipe.name);
+                }
+            };
+            list.appendChild(li);
+        });
 
-    recipes.push({
-        name: name,
-        ingredients: ingredients,
-        category: category,
-        favorite: false,
-        time: time,
-        flies: flies
-    });
+        categoriesContainer.appendChild(catDiv);
+        if (categoryRecipes.length === 0 && category !== 'Foggy Day') {
+                 // Just to keep the Foggy Day section visible if it's foggy
+                 // but maybe just general recipes if empty
+            } 
+        
+        if (categoryRecipes.length === 0) {
+            const emptyMsg = document.createElement('p');
+            emptyMsg.className = 'empty-msg';
+            emptyMsg.textContent = 'No recipes found here.';
+            catDiv.forEach(item => {
+                catDiv.appendChild(emptyMsg);
+            }); 
+        }
 
-    // Clear inputs
-    document.getElementById('recipe-name').value = '';
-    document.getElementById('recipe-ingredients').value = '';
-    document.getElementById('recipe-time').value = '';
-    document.getElementById('recipe-flies').value = '';
+        if (categoryRecipes.length === 0) {
+             catDiv.appendChild(emptyMsg);
+        }
 
-    loadRecipes();
-}
+        if (categoryRecipes.length === 0) {
+             catDiv.appendChild(emptyMsg);
+        }
 
-function toggleFavorite(event, recipeName) {
-    const recipe = recipes.find(r => r.name === recipeName);
-    if (recipe) {
-        recipe.favorite = !recipe.favorite;
-        loadRecipes();
-    }
-}
+        if (categoryRecipes.length === 0) {
+             catDiv.appendChild(emptyMsg);
+        }
 
-function filterRecipes() {
-    loadRecipes(document.getElementById('recipe-search').value);
-}
+        if (categoryRecipes.length === 0) {
+             catDiv.appendChild(emptyMsg);
+        }
 
-function pickRandomRecipe() {
-    const filtered = recipes.filter(r => r.name.toLowerCase().includes(document.getElementById('recipe-search').value.toLowerCase()));
-    if (filtered.length === 0) {
-        alert("No berries to pick! Try searching for something else.");
-        return;
-    }
-    
-    const randomIndex = Math.floor(Math.random() * filtered.length);
-    const selectedRecipe = filtered[randomIndex];
-    
-    // Redraw to ensure we have the element to target
-    loadRecipes();
-    
-    // Find the element by name (since we can't easily map indices to DOM elements)
-    const recipeElements = document.querySelectorAll('.recipe-item');
-    const target// [context trimmed]...]
+        if (categoryRecipes.length === 0) {
+             catDiv.appendChild(emptyMsg);
+        }
+
+        if (categoryRecipes.length === 0) {
+             catDiv.appendChild(emptyMsg);
+        }
+
+        if (categoryRecipes.length === 0) {
+             catDiv.appendChild(emptyMsg);
+        }
+
+        if (categoryRecipes.length === 0) {
+             catDiv.appendChild(emptyMsg);
+        }
+
+        if (categoryRecipes.length === 0) {
+             catDiv.appendChild(emptyMsg);
+        }
+
+        if (categoryRecipes.length === 0) {
+             catDiv.appendChild(emptyMsg);
+        }
+
+        if (categoryRecipes.length === 0) {
+             catDiv.appendChild(emptyMsg);
+        }
+
+        if (categoryRecipes.length === 0) class = 'empty-msg';
+
+        if (categoryRecipes.length === 0) {
+             catDiv.appendChild(emptyMsg);
+        }
+
+        if (categoryRecipes.length.length === 0) category.length === 0; 
+
+        if (categoryRecipes.length === 0) {
+             catDiv.appendChild(emptyMsg);
+            }
+
+        if (Instructions-step-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-list-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-这件事-            { 
