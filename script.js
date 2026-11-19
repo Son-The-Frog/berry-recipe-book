@@ -23,37 +23,37 @@ function loadRecipes(filterText = "") {
             
             const title = document.createElement('h3');
             title.className = 'category-title';
-            title.innerText = (cat === 'General' ? '🍓' : '☁️') + " " + cat;
-            
+            title.title = 'Category: ' + cat;
+            title.innerText = cat;
+            section.appendChild(title);
+
             const list = document.createElement('ul');
             list.className = 'recipe-list';
 
-            filteredCategoryRecipes.forEach((recipe, index) => {
-                const recipeId = `recipe-${recipe.category}-${index}`;
+            filteredCategoryRecipes.forEach(recipe => {
                 const li = document.createElement('li');
                 li.className = 'recipe-item';
-                li.id = recipeId;
-                li.onclick = () => toggleRecipeDetails(li);
-                
-                const name = document.createElement('div');
-                name.className = 'recipe-name';
-                name.innerText = recipe.name;
-                
-                const details = document.createElement('div');
-                details.className = 'recipe-details';
-                details.innerText = `Ingredients: ${recipe.ingredients} | Time: ${recipe.time} | Flies: ${recipe.flies}`;
+                li.onclick = () => toggleRecipe(li);
                 
                 const favBtn = document.createElement('button');
                 favBtn.className = 'fav-btn';
-                favBtn.innerText = '❤';
                 favBtn.onclick = (e) => {
                     e.stopPropagation();
                     toggleFavorite(recipe);
                 };
+                favBtn.innerText = recipe.favorite ? '❤️' : '🤍';
                 
-                li.appendChild(name);
-                li.appendChild(details);
+                const nameSpan = document.createElement('span');
+                nameSpan.innerText = recipe.name;
+                
                 li.appendChild(favBtn);
+                li.appendChild(nameSpan);
+
+                const details = document.createElement('div');
+                details.className = 'recipe-details';
+                details.innerText = `Ingredients: ${recipe.ingredients}\nTime: ${recipe.time} | Flies: ${recipe.flies}`;
+                li.appendChild(details);
+                
                 list.appendChild(li);
             });
 
@@ -62,18 +62,13 @@ function loadRecipes(filterText = "") {
     });
 }
 
-function toggleRecipeDetails(element) {
+function toggleRecipe(element) {
     element.classList.toggle('active');
 }
 
 function toggleFavorite(recipe) {
     recipe.favorite = !recipe.favorite;
     loadRecipes();
-}
-
-function filterRecipes() {
-    const searchInput = document.getElementById('recipe-search');
-    loadRecipes(searchInput.value);
 }
 
 function addRecipe() {
@@ -84,55 +79,54 @@ function addRecipe() {
     const category = document.getElementById('recipe-category').value;
 
     if (name && ingredients) {
-        recipes.push({ 
-            name, 
-            ingredients, 
-            time: time || "Unknown", 
-            flies: flies || 0, 
-            category, 
-            favorite: false 
+        recipes.push({
+            name: name,
+            ingredients: ingredients,
+            time: time || 'Unknown',
+            flies: flies || 0,
+            category: category,
+            favorite: false
         });
         
-        // Clear inputs
+        // Clear form
         document.getElementById('recipe-name').value = '';
         document.getElementById('recipe-ingredients').value = '';
         document.getElementById('recipe-time').value = '';
         document.getElementById('recipe-flies').value = '';
-        
+
         loadRecipes();
     } else {
-        alert("Please fill in the name and ingredients!");
-    }}
-
-function pickRandomRecipe() {
-    if (recipes.length === 0) return;
-
-    const randomIndex = Math.floor(Math.random() * recipes.length);
-    const selectedRecipe = recipes[randomIndex];
-    
-    // We need to find the element in the DOM
-    // Since recipes are grouped by category, we're currently rendering them
-    // based on the filtered list. We need a search for the element based on the name
-    // because IDs are based on index in filtered list.
-    // Since we're loadRecipes() is called often, we need a better way to find the elements.
-    // loadRecipes() now creates IDs like recipe-category-index
-    
-    // To make it a a simple way to find it, we'll just search for the name
-    const allItems = document.querySelectorAll('.recipe-item');
-    const target = Array.from(allItems).find(el => el.querySelector('.recipe-name').innerText === selectedRecipe.name);
-
-    if (target) {
-        // Remove highlight from others
-        document.querySelectorAll('.recipe-item').forEach(el => el.classList.remove('highlight-recipe'));
-        
-        target.classList.add('highlight-recipe');
-        target.classList.add('active');
-        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        alert('Please enter a name and ingredients!');
     }
 }
 
-function __init__() {
-    loadRecipes();
+function filterRecipes() {
+    const searchText = document.getElementById('recipe-search').value;
+    loadRecipes(searchText);
 }
 
-__init__();
+function pickRandomRecipe() {
+    const filteredRecipes = recipes.filter(r => r.name.toLowerCase().includes(document.getElementById('recipe-search').value.toLowerCase()) || r.ingredients.toLowerCase().includes(document.getElementById('recipe-search').value.toLowerCase()));
+    const available = filteredRecipes.length > 0 ? filteredRecipes : recipes;
+    const randomIndex = Math.floor(Math.random() * available.length);
+    const selected = available[randomIndex];
+
+    loadRecipes(); // Refresh list to remove highlights
+    
+    // Find the element in the DOM after loadRecipes is called
+    const items = document.querySelectorAll('.recipe-item');
+    const targetIndex = recipes.indexOf(selected);
+    // This is a bit simplified, since categories split the lists
+    // We search for the name to find the correct item
+    const itemsWithNames = Array.from(items).filter(item => item.innerText.includes(selected.name));
+    const targetElement = itemsWithNames[0];
+
+    if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        targetElement.classList.add('highlight-recipe');
+        targetElement.classList.add('active');
+    }
+}
+
+// Initial load
+loadRecipes();
