@@ -13,6 +13,11 @@ function renderRecipes() {
 
     categories.forEach(category => {
         const section = document.createElement('div');
+        
+        if (category === 'Foggy Day') {
+            section.className = 'category-foggy';
+        }
+        
         section.innerHTML = `<h3 class="category-title">${category}</h3>`;
         
         const list = document.createElement('ul');

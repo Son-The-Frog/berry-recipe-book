@@ -89,3 +89,26 @@ h1 {
 .recipe-item.active .recipe-details {
     display: block;
 }
+
+/* Foggy Day Styles */
+.category-foggy {
+    background: #f0f4f7;
+    padding: 15px;
+    border-radius: 12px;
+    border: 2px dashed #b0c4de;
+    margin-top: 30px;
+}
+.category-foggy .category-title {
+    color: #708090;
+    border-bottom-color: #b0c4de;
+}
+.category-foggy .recipe-item {
+    background: #e6eff5;
+    border-left-color: #708090;
+}
+.category-foggy .recipe-item:hover {
+    background: #dbe7f0;
+}
+.category-foggy .recipe-details {
+    border-top-color: #b0c4de;
+}
