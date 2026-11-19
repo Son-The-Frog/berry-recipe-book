@@ -66,16 +66,18 @@ h1 {
     padding: 0;
 }
 .recipe-item {
-    background: #fff5f5;
+    background: #fdf5e6;
     margin: 10px 0;
     padding: 15px;
-    border-radius: 8px;
-    border-left: 5px solid #d63384;
+    border-radius: 2px;
+    border: 1px solid #d2b48c;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
     cursor: pointer;
     transition: background 0.3s, transform 0.1s;
+    position: relative;
 }
 .recipe-item:hover {
-    background: #ffebeb;
+    background: #faebd7;
     transform: scale(1.01);
 }
 .recipe-details {
@@ -83,7 +85,7 @@ h1 {
     padding: 10px 0 0 10px;
     color: #666;
     font-style: italic;
-    border-top: 1px dashed #f8d7da;
+    border-top: 1px dashed #d2b48c;
     margin-top: 10px;
 }
 .recipe-item.active .recipe-details {
@@ -103,11 +105,11 @@ h1 {
     border-bottom-color: #b0c4de;
 }
 .category-foggy .recipe-item {
-    background: #e6eff5;
-    border-left-color: #708090;
+    background: #fdfaf0;
+    border-color: #c0c0c0;
 }
 .category-foggy .recipe-item:hover {
-    background: #dbe7f0;
+    background: #f5f5f5;
 }
 .category-foggy .recipe-details {
     border-top-color: #b0c4de;
