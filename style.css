@@ -57,9 +57,12 @@ h1 {
 }
 .search-container {
     margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
 .search-container input {
-    width: 100%;
+    flex: 1;
     box-sizing: border-box;
     padding: 12px;
     border: 2px solid #f8d7da;
@@ -72,6 +75,20 @@ h1 {
 .search-container input:focus {
     border-color: #d63384;
     box-shadow: 0 0 5px rgba(214, 51, 132, 0.3);
+}
+#random-recipe-btn {
+    background-color: #ff8fab;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    white-space: nowrap;
+    transition: 0.3s;
+}
+#random-recipe-btn:hover {
+    background-color: #f778a1;
 }
 .category-title {
     color: #d63384;
@@ -91,7 +108,7 @@ h1 {
     border: 1px solid #d2b48c;
     box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
     cursor: pointer;
-    transition: background 0.3s, transform 0.1s;
+    transition: background 0.3s, transform 0.1s, border-color 0.3s;
     position: relative;
     overflow: hidden;
 }
@@ -117,8 +134,6 @@ h1 {
     margin-top: 10px;
     opacity: 1;
 }
-
-/* Favorite Button Styles */
 .fav-btn {
     position: absolute;
     right: 15px;
@@ -137,8 +152,6 @@ h1 {
 .fav-btn.active {
     color: #d63384;
 }
-
-/* Foggy Day Styles */
 .category-foggy {
     background: #f0f4f7;
     padding: 15px;
@@ -159,4 +172,13 @@ h1 {
 }
 .category-foggy .recipe-details {
     border-top-color: #b0c4de;
+}
+.highlight-recipe {
+    animation: highlight-fade 1.5s ease-out;
+    border: 2px solid #d63384 !important;
+    background-color: #fff0f5 !important;
+}
+@keyframes highlight-fade {
+    0% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
