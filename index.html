@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,6 +20,10 @@
                 <option value="Foggy Day">Foggy Day</option>
             </select>
             <button onclick="addRecipe()">Add to Book</button>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="recipe-search" placeholder="Search berries or ingredients..." oninput="filterRecipes()">
         </div>
 
         <div id="categories-container">

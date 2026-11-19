@@ -55,6 +55,24 @@ h1 {
 .recipe-form button:hover {
     background-color: #b02a6b;
 }
+.search-container {
+    margin-bottom: 20px;
+}
+.search-container input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 2px solid #f8d7da;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 16px;
+    outline: none;
+    transition: 0.3s;
+}
+.search-container input:focus {
+    border-color: #d63384;
+    box-shadow: 0 0 5px rgba(214, 51, 132, 0.3);
+}
 .category-title {
     color: #d63384;
     border-bottom: 2px solid #f8d7da;
