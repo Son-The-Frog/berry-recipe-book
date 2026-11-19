@@ -118,6 +118,26 @@ h1 {
     opacity: 1;
 }
 
+/* Favorite Button Styles */
+.fav-btn {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    transition: transform 0.2s, color 0.2s;
+    color: #ccc;
+    z-index: 10;
+}
+.fav-btn:hover {
+    transform: scale(1.2);
+}
+.fav-btn.active {
+    color: #d63384;
+}
+
 /* Foggy Day Styles */
 .category-foggy {
     background: #f0f4f7;
