@@ -132,6 +132,11 @@ h1 {
 .recipe-item:hover strong {
     text-shadow: 0 0 12px rgba(178, 34, 34, 0.4);
 }
+.berry-icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
 .recipe-details {
     max-height: 0;
     overflow: hidden;
@@ -193,8 +198,3 @@ h1 {
     from { opacity: 0; }
     to { opacity: 1; }
 }
-@keyframes highlight-fade {
-    from { border: 2px solid #b22222; }
-    to { border: 2px solid #d2b48c; }
-}
-"}, {
