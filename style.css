@@ -1,6 +1,9 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #fdf5e6; /* Cream background */
+    background-image: url('assets/berry_pattern.png');
+    background-repeat: repeat;
+    background-size: 100px 100px;
     color: #5d4037; /* Deep brown for text */
     margin: 0;
     padding: 20px;
@@ -11,7 +14,7 @@ body {
 .container {
     max-width: 600px;
     width: 100%;
-    background: #fffaf0; /* Floral white */
+    background: #fffaf0;
     background-image: radial-gradient(#fff0f5 2px, transparent 2px);
     background-size: 20px 20px;
     padding: 20px;
@@ -195,9 +198,8 @@ h1 {
     animation: bounce 0.3s ease-in-out;
 }
 @keyframes bounce {
-    0% { transform: scale(1); }
+    0%, 100% { transform: scale(1); }
     50% { transform: scale(0.95); }
-    100% { transform: scale(1); }
 }
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
