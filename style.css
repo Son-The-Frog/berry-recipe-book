@@ -1,10 +1,10 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #fdf5e6; /* Cream background */
+    background-color: #fdf5e6;
     background-image: url('assets/berry_pattern.png');
     background-repeat: repeat;
     background-size: 100px 100px;
-    color: #5d4037; /* Deep brown for text */
+    color: #5d4037;
     margin: 0;
     padding: 20px;
     display: flex;
@@ -20,7 +20,7 @@ body {
     padding: 20px;
     border-radius: 15px;
     box-shadow: 0 4px 15px rgba(93, 64, 55, 0.15);
-    border: 3px solid #b22222; /* Firebrick red */
+    border: 3px solid #b22222;
     animation: fadeIn 1.2s ease-in-out;
 }
 h1 {
@@ -64,6 +64,7 @@ h1 {
     display: flex;
     gap: 10px;
     align-items: center;
+    flex-wrap: wrap;
 }
 .search-container input, .search-container select {
     box-sizing: border-box;
@@ -77,12 +78,13 @@ h1 {
 }
 .search-container input {
     flex: 1;
+    min-width: 120px;
 }
 .search-container input:focus, .search-container select:focus {
     border-color: #b22222;
     box-shadow: 0 0 5px rgba(178, 34, 34, 0.3);
 }
-#random-recipe-btn {
+#random-recipe-btn, #clear-filter-btn {
     background-color: #cd5c5c;
     color: white;
     border: none;
@@ -93,7 +95,7 @@ h1 {
     white-space: nowrap;
     transition: 0.3s;
 }
-#random-recipe-btn:hover {
+#random-recipe-btn:hover, #clear-filter-btn:hover {
     background-color: #b22222;
 }
 .category-title {
@@ -187,16 +189,12 @@ h1 {
 .category-foggy .recipe-details {
     border-top-color: #b0c4de;
 }
-.highlight-recipe {
-    animation: highlight-fade 1.5s ease-out;
-    border: 2px solid #b22222 !important;
-    background-color: #fff0f5 !important;
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 @keyframes highlight-fade {
-    0% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+    from { border: 2px solid #b22222; }
+    to { border: 2px solid #d2b48c; }
 }
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+"}, {
