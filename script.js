@@ -1,11 +1,57 @@
-let recipes = [
-    { name: "Strawberry Shortcake", ingredients: ["Strawberry", "Cream", "Flour", "Sugar"], time: "30 mins", flies: 5, category: "General" },
-    { name: "Blueberry Muffin", ingredients: ["Blueberry", "Butter", "Flour", "Lour", "Sugar"], time: "20 mins", flies: 5, category: "General" },
-    { name: "Honey Glazed Berry Berries", ingredients: ["Berry", "Honey", "Butter"], time: "15 mins", flies: 3, category: "Foggy Day" },
-    { name: "Blueberry Jam up in the Sky", ingredients: ["Blueberry", "Blueberry", "Sugar", "Lemon"], time: "45 mins", flies: 10, category: "Foggy Day" }
-];
-
+let recipes = [];
 let shoppingList = [];
+
+function init() {
+    const savedRecipes = localStorage.getItem('berryRecipes');
+    if (savedRecipes) {
+        recipes = JSON.parse(savedRecipes);
+        renderRecipes();
+    }
+    const savedShoppingList = localStorage.getItem('berryShoppingList');
+    if (savedShoppingList) {
+        shoppingList = JSON.parse(savedShoppingList);
+        renderShoppingList();
+    }
+}
+
+function addRecipe() {
+    const name = document.getElementById('recipe-name').value;
+    const ingredients = document.getElementById('recipe-ingredients').value;
+    const time = document.getElementById('recipe-time').value;
+    const flies = document.getElementById('recipe-flies').value;
+    const category = document.getElementById('recipe-category').value;
+
+    if (!name || !ingredients) {
+        alert('Please enter at least a name and ingredients!');
+        return;
+    }
+
+    const newRecipe = {
+        id: Date.now(),
+        name,
+        ingredients,
+        time,
+        flies,
+        category,
+        isFavorite: false
+    };
+
+    recipes.push(newRecipe);
+    saveRecipes();
+    renderRecipes();
+    clearRecipeForm();
+}
+
+function clearRecipeForm() {
+    document.getElementById('recipe-name').value = '';
+    document.getElementById('recipe-ingredients').value = '';
+    document.getElementById('recipe-time').value = '';
+    document.getElementById('recipe-flies').value = '';
+}
+
+function saveRecipes() {
+    localStorage.setItem('berryRecipes', JSON.stringify(recipes));
+}
 
 function renderRecipes() {
     const container = document.getElementById('categories-container');
@@ -15,62 +61,63 @@ function renderRecipes() {
     
     categories.forEach(category => {
         const categoryDiv = document.createElement('div');
-        categoryDiv.className = 'category-group';
-        categoryDiv.innerHTML = `<h3 class="category-title">${category}</h3><ul class="recipe-list"></ul>`;
+        categoryDiv.innerHTML = `<h3 class="category-title">${category}</h3>`;
         
-        const list = categoryDiv.querySelector('.recipe-list');
+        const list = document.createElement('ul');
+        list.className = 'recipe-list';
         
-        recipes.filter(r => r.category === category).forEach(recipe => {
+        const categoryRecipes = recipes.filter(r => r.category === category);
+        categoryRecipes.forEach(recipe => {
             const li = document.createElement('li');
             li.className = 'recipe-item';
-            li.onclick = () => toggleRecipeDetails(li);
+            li.dataset.id = recipe.id;
+            
+            const ingredientsArray = recipe.ingredients.split(',').map(i => i.trim());
             
             li.innerHTML = `
+                <button class="fav-btn ${recipe.isFavorite ? 'active' : ''}" onclick="toggleFavorite(${recipe.id})">★</button>
                 <strong>${recipe.name}</strong>
-                <button class="fav-btn" onclick="event.stopPropagation(); toggleFavorite(this, '${recipe.name}')">★</button>
                 <div class="recipe-details">
+                    <p>Time: ${recipe.time || 'Unknown'} | Flies: ${recipe.flies || '0'}</p>
                     <ul class="ingredients-list">
-                        ${recipe.ingredients.map(ing => `<li>${ing}</li>`).join('')}
+                        ${ingredientsArray.map(ing => `<li>${ing}</li>`).join('')}
                     </ul>
-                    <p>Time: ${recipe.time} | Flies: ${recipe.flies}</p>
+                    <button class="add-to-shopping-btn" onclick="addIngredientsToShoppingList(${recipe.id})">Add Ingredients to List</button>
                 </div>
             `;
+            
+            li.onclick = (e) => {
+                if (e.target.tagName === 'BUTTON') return;
+                li.classList.toggle('active');
+            };
+            
             list.appendChild(li);
         });
+        
+        container.appendChild(categoryDiv);
+        container.appendChild(list);
     });
 }
 
-function toggleRecipeDetails(element) {
-    element.classList.toggle('active');
-}
-
-function addRecipe() {
-    const name = document.getElementById('recipe-name').value;
-    const ingredients = document.getElementById('recipe-ingredients').value.split(',').map(i => i.trim());
-    const time = document.getElementById('recipe-time').value;
-    const flies = document.getElementById('recipe-flies').value;
-    const category = document.getElementById('recipe-category').value;
-
-    if (name && ingredients[0] && time && flies) {
-        recipes.push({ name, ingredients, time, flies, category });
+function toggleFavorite(id) {
+    const recipe = recipes.find(r => r.id === id);
+    if (recipe) {
+        recipe.isFavorite = !recipe.isFavorite;
+        saveRecipes();
         renderRecipes();
-        
-        document.getElementById('recipe-name').value = '';
-        document.getElementById('recipe-ingredients').value = '';
-        document.getElementById('recipe-time').value = '';
-        document.getElementById('recipe-flies').value = '';
     }
 }
 
 function filterRecipes() {
     const searchTerm = document.getElementById('recipe-search').value.toLowerCase();
     const categoryFilter = document.getElementById('category-filter').value;
-
-    const filtered = recipes.filter(r => 
-        (r.name.toLowerCase().includes(searchTerm) || 
-         r.ingredients.some(ing => ing.toLowerCase().includes(searchTerm))) &&
-        (categoryFilter === 'All' || r.category === categoryFilter)
-    );
+    
+    const filtered = recipes.filter(recipe => {
+        const matchesSearch = recipe.name.toLowerCase().includes(searchTerm) || 
+                             recipe.ingredients.toLowerCase().includes(searchTerm);
+        const matchesCategory = categoryFilter === 'All' || recipe.category === categoryFilter;
+        return matchesSearch && matchesCategory;
+    });
 
     renderFilteredRecipes(filtered);
 }
@@ -79,59 +126,70 @@ function renderFilteredRecipes(filteredRecipes) {
     const container = document.getElementById('categories-container');
     container.innerHTML = '';
 
-    if (filteredRecipes.length === 0) {
-        document.getElementById('no-results-message').style.display = 'block';
-        return;
-    } else {
-        document.getElementById('no-results-message').style.display = 'none';
-    }
-
     const categories = [...new Set(filteredRecipes.map(r => r.category))];
     
     categories.forEach(category => {
         const categoryDiv = document.createElement('div');
-        categoryDiv.className = 'category-group';
-        categoryDiv.innerHTML = `<h3 class="category-title">${category}</h3><ul class="recipe-list"></ul>`;
-        const list = categoryDiv.querySelector('.recipe-list');
+        categoryDiv.innerHTML = `<h3 class="category-title">${category}</h3>`;
         
-        filteredRecipes.filter(r => r.category === category).forEach(recipe => {
+        const list = document.createElement('ul');
+        list.className = 'recipe-list';
+        
+        const categoryRecipes = filteredRecipes.filter(r => r.category === category);
+        categoryRecipes.forEach(recipe => {
             const li = document.createElement('li');
             li.className = 'recipe-item';
-            li.onclick = () => toggleRecipeDetails(li);
+            li.dataset.id = recipe.id;
+            
+            const ingredientsArray = recipe.ingredients.split(',').map(i => i.trim());
+            
             li.innerHTML = `
+                <button class="fav-btn ${recipe.isFavorite ? 'active' : ''}" onclick="toggleFavorite(${recipe.id})">★</button>
                 <strong>${recipe.name}</strong>
-                <button class="fav-btn" onclick="event.stopPropagation(); toggleFavorite(this, '${recipe.name}')">★</button>
                 <div class="recipe-details">
+                    <p>Time: ${recipe.time || 'Unknown'} | Flies: ${recipe.flies || '0'}</p>
                     <ul class="ingredients-list">
-                        ${recipe.ingredients.map(ing => `<li>${ing}</li>`).join('')}
+                        ${ingredientsArray.map(ing => `<li>${ing}</li>`).join('')}
                     </ul>
-                    <p>Time: ${recipe.time} | Flies: ${recipe.flies}</p>
+                    <button class="add-to-shopping-btn" onclick="addIngredientsToShoppingList(${recipe.id})">Add Ingredients to List</button>
                 </div>
             `;
+            
+            li.onclick = (e) => {
+                if (e.target.tagName === 'BUTTON') return;
+                li.classList.toggle('active');
+            };
+            
             list.appendChild(li);
         });
+        
+        container.appendChild(categoryDiv);
+        container.appendChild(list);
     });
-}
-
-function pickRandomRecipe() {
-    const random = recipes[Math.floor(Math.random() * recipes.length)];
-    if (random) {
-        renderRecipes();
-        // I'll need a way to highlight it. For now just alert it.
-        alert(`Son's Special Pick: ${random.name}!`);
-    }
 }
 
 function clearFilters() {
     document.getElementById('recipe-search').value = '';
     document.getElementById('category-filter').value = 'All';
     renderRecipes();
-    document.getElementById('no-results-message').style.display = 'none';
 }
 
-function toggleFavorite(btn, recipeName) {
-    // Just a visual toggle for now
-    btn.classList.toggle('active');
+function pickRandomRecipe() {
+    const randomIndex = Math.floor(Math.random() * recipes.length);
+    if (randomIndex === -1) return;
+    
+    const recipe = recipes[randomIndex];
+    const items = document.querySelectorAll('.recipe-item');
+    
+    // Clear all active states
+    items.forEach(item => item.classList.remove('active'));
+    
+    // Find the item with the id
+    const targetItem = document.querySelector(`.recipe-item[data-id="${recipe.id}"]`);
+    if (targetItem) {
+        targetItem.classList.add('active');
+        targetItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 }
 
 function addToShoppingList() {
@@ -140,22 +198,47 @@ function addToShoppingList() {
     
     if (item) {
         shoppingList.push(item);
+        saveShoppingList();
+        renderShoppingList();
         input.value = '';
+    }
+}
+
+function addIngredientsToShoppingList(recipeId) {
+    const recipe = recipes.find(r => r.id === recipeId);
+    if (recipe && recipe.ingredients) {
+        const ingredients = recipe.ingredients.split(',').map(i => i.trim());
+        ingredients.forEach(item => {
+            if (item && !shoppingList.includes(item)) {
+                shoppingList.push(item);
+            }
+        });
+        saveShoppingList();
         renderShoppingList();
     }
 }
 
+function saveShoppingList() {
+    localStorage.setItem('berryShoppingList', JSON.stringify(shoppingList));
+}
+
 function renderShoppingList() {
-    const listElement = document.getElementById('shopping-list');
-    listElement.innerHTML = '';
+    const listUl = document.getElementById('shopping-list');
+    listUl.innerHTML = '';
     
     shoppingList.forEach((item, index) => {
         const li = document.createElement('li');
         li.textContent = item;
-        listElement.appendChild(li);
+        li.onclick = () => removeShoppingItem(index);
+        li.className = 'shopping-item';
+        listUl.appendChild(li);
     });
 }
 
-window.onload = () => {
-    renderRecipes();
-};
+function removeShoppingItem(index) {
+    shoppingList.splice(index, 1);
+    saveShoppingList();
+    renderShoppingList();
+}
+
+window.onload = init;
