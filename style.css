@@ -109,19 +109,21 @@ h1 {
     padding: 0;
 }
 .recipe-item {
-    background: #fffaf0;
+    background-color: #fffaf0;
+    background-image: url('assets/paper_texture.png');
+    background-repeat: repeat;
     margin: 10px 0;
     padding: 15px;
     border-radius: 12px;
     border: 1px solid #d2b48c;
     box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
     cursor: pointer;
-    transition: background 0.3s, transform 0.1s, border-color 0.3s;
+    transition: background-color 0.3s, transform 0.1s, border-color 0.3s;
     position: relative;
     overflow: hidden;
 }
 .recipe-item:hover {
-    background: #faebd7;
+    background-color: #faebd7;
     transform: scale(1.01);
 }
 .recipe-item strong {
@@ -183,26 +185,12 @@ h1 {
 .fav-btn.active {
     color: #b22222;
 }
-.category-foggy {
-    background: #f5f5f5;
-    padding: 15px;
-    border-radius: 12px;
-    border: 2px dashed #b0c4de;
-    margin-top: 30px;
-}
-.category-foggy .category-title {
-    color: #708090;
-    border-bottom-color: #b0c4de;
-}
-.category-foggy .recipe-item {
-    background: #fdfaf0;
-}
 .shopping-list-section {
     margin-top: 30px;
     padding: 20px;
     background: #fff5f5;
     border-radius: 15px;
-    border: 2px solid #f8d7da;
+    border: 2px dashed #f8d7da;
 }
 .shopping-input-group {
     display: flex;
@@ -212,54 +200,55 @@ h1 {
 .shopping-input-group input {
     flex: 1;
     padding: 10px;
-    border: 1px solid #f8d7da;
-    border-radius: 5px;
+    border: 2px solid #f8d7da;
+    border-radius: 8px;
+    outline: none;
 }
-.shopping-input-group button {
+#add-shopping-btn {
     background-color: #b22222;
     color: white;
     border: none;
     padding: 10px 20px;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
     font-weight: bold;
 }
 #shopping-list {
     list-style: none;
     padding: 0;
+    margin-bottom: 15px;
 }
-.shopping-item {
+#shopping-list li {
+    background: #fffaf0;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 5px;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
-    padding: 8px 0;
-    border-bottom: 1px solid #f8d7da;
-    color: #5d4037;
-}
-.shopping-item:last-child {
-    border-bottom: none;
-}
-.shopping-item input[type="checkbox"] {
-    cursor: pointer;
-    accent-color: #b22222;
-    width: 18px;
-    height: 18px;
-}
-.shopping-item.bought {
-    color: #a0a0a0;
-    text-decoration: line-through;
+    border: 1px solid #f8d7da;
 }
 .remove-shopping-btn {
-    margin-left: auto;
     background: none;
     border: none;
-    color: #cd5c5c;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: bold;
-}
-.remove-shopping-btn:hover {
     color: #b22222;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+}
+#clear-shopping-btn {
+    background-color: #cd5c5c;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+    transition: 0.3s;
+}
+#clear-shopping-btn:hover {
+    background-color: #b22222;
 }
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
