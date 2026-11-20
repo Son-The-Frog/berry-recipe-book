@@ -116,6 +116,14 @@ h1 {
     background: #faebd7;
     transform: scale(1.01);
 }
+.recipe-item strong {
+    color: #b22222;
+    text-shadow: 0 0 8px rgba(178, 34, 34, 0.2);
+    transition: text-shadow 0.3s ease;
+}
+.recipe-item:hover strong {
+    text-shadow: 0 0 12px rgba(178, 34, 34, 0.4);
+}
 .recipe-details {
     max-height: 0;
     overflow: hidden;
