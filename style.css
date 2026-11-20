@@ -18,6 +18,7 @@ body {
     border-radius: 15px;
     box-shadow: 0 4px 15px rgba(93, 64, 55, 0.15);
     border: 3px solid #b22222; /* Firebrick red */
+    animation: fadeIn 1.2s ease-in-out;
 }
 h1 {
     color: #b22222;
@@ -187,7 +188,7 @@ h1 {
     background-color: #fff0f5 !important;
 }
 @keyframes highlight-fade {
-    0% { transform: scale(1.05); } 
+    0% { transform: scale(1.05); }
     100% { transform: scale(1); }
 }
 .click-bounce {
@@ -195,6 +196,10 @@ h1 {
 }
 @keyframes bounce {
     0% { transform: scale(1); }
-    50% { transform: scale(0.97); }
+    50% { transform: scale(0.95); }
     100% { transform: scale(1); }
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
