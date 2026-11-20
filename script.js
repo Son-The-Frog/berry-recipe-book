@@ -1,283 +1,81 @@
 const recipes = [
-    { name: "Honey Glazed Berry Berries", ingredients: "Sweet honey, giant red berries, a pinch of sugar.", category: "General", favorite: false, time: "15 mins", flies: 2, steps: ["Mix honey and berries", "Glaze them with sugar", "Let them sit for 5 minutes"] },
-    { name: "Foggy Morning Berry Jam", ingredients: "Blueberries, raspberries, lemon juice, brown sugar", category: "Foggy Day", favorite: false, time: "20 mins", flies: 5, steps: ["Crush berries", "Lather with sugar", "Boil until thick"] },
-    { name: "Berry Blast Smoothie Smoothie", ingredients: "Strawberries, bananas, yogurt, honey", category: "General", favorite: false, time: "5 mins", flies: 1, steps: ["Put everything in blender", "Blend until smooth", "Pour into a glass"] },
-    { name: "Warm Berry Crumble own own", ingredients: "Strawberries, blueberries, flour, butter, cinnamon", category: "Foggy Day", favorite: false, time: "30 mins", flies: 8, steps: ["Mix flour and butter", "Toss berries with cinnamon", "Bake until golden brown"] },
-    { name: "Berry Tartlet Tiny Tiny", ingredients: "Strawberries, blueberries, blueberries, pastry shell, whipped cream", category: "General", favorite: false, time: "10 mins", flies: 3, steps: ["Fill shell with berries", "Top with whipped cream", "Chill for 10 minutes"] }
+    { name: "Honey Glazed Berry Berries", ingredients: "Sweet honey, giant red berries, a pinch of sugar.", category: "General", favorite: false, time: "15 mins", flies: 2 },
+    { name: "Foggy Morning Berry Jam", ingredients: "Blueberries, blackberries, lemon juice, brown sugar.", category: "Foggy Day", favorite: true, time: "30 mins", flies: 5 },
+    { name: "Sparkling Berry Sorbet", ingredients: "Raspberries, lime, ice crystals, mint leaf.", category: "General", favorite: false, time: "10 mins", flies: 1 },
+    { name: "Cozy Berry Porridge", ingredients: "Oats, milk, strawberries, a drizzle of maple syrup.", category: "Foggy Day", favorite: true, time: "20 mins", flies: 3 }
 ];
 
-let currentFilter = 'All';
-let currentSearch = '';
-
 function renderRecipes() {
     const container = document.getElementById('categories-container');
     container.innerHTML = '';
 
-    const categories = ['General', 'Foggy Day'];
-    
+    const categories = [...new Set(recipes.map(r => r.category))];
+
     categories.forEach(cat => {
-        const filteredRecipes = recipes.filter(r => {
-            const matchesCategory = (currentFilter === 'All' || r.category === currentFilter);
-            const matchesSearch = r.name.toLowerCase().includes(currentSearch.toLowerCase()) || 
-                                r.ingredients.toLowerCase().includes(currentSearch.toLowerCase());
-            return matchesCategory && matchesSearch;
+        const catDiv = document.createElement('div');
+        catDiv.className = `category-section ${cat === 'Foggy Day' ? 'category-foggy' : ''}`;
+
+        const title = document.createElement('h2');
+        title.className = 'category-title';
+        title.textContent = cat;
+        catDiv.appendChild(title);
+
+        const list = document.createElement('ul');
+        list.className = 'recipe-list';
+
+        const filtered = recipes.filter(r => {
+            const searchTerm = document.getElementById('recipe-search').value.toLowerCase();
+            const categoryFilter = document.getElementById('category-filter').value;
+            const matchesSearch = r.name.toLowerCase().includes(searchTerm) || r.ingredients.toLowerCase().includes(searchTerm);
+            const matchesCategory = categoryFilter === 'All' || r.category === categoryFilter;
+            return matchesSearch && matchesCategory;
         });
 
-        if (filteredRecipes.length > 0) {
-            const catDiv = document.createElement('div');
-            catDiv.className = `category-section ${cat === 'Foggy Day' ? 'category-foggy' : ''}`;
+        filtered.forEach((recipe, index) => {
+            const item = document.createElement('li');
+            item.className = 'recipe-item';
             
-            const title = document.createElement('h2');
-            title.className = 'category-title';
-            title.innerText = cat;
-            catDiv.appendChild(title);
+            const favBtn = document.createElement('button');
+            favBtn.className = `fav-btn ${recipe.favorite ? 'active' : ''}`;
+            favBtn.innerHTML = '❤';
+            favBtn.onclick = (e) => {
+                e.stopPropagation();
+                toggleFavorite(recipe);
+            };
 
-            const list = document.createElement('ul');
-            list.className = 'recipe-list';
-
-            filteredRecipes.forEach(recipe => {
-                const li = document.createElement('li');
-                li.className = 'recipe-item';
-                
-                // Toggle active state for details
-                li.onclick = () => {
-                    li.classList.toggle('active');
-                };
-
-                const nameContainer = document.createElement('div');
-                nameContainer.style.display = 'flex';
-                nameContainer.style.alignItems = 'center';
-                nameContainer.style.gap = '8px';
-                
-                const icon = document.createElement('img');
-                icon.src = 'assets/berry_icon.png';
-                icon.className = 'berry-icon';
-                nameContainer.appendChild(icon);
-
-                const nameSpan = document.createElement('strong');
-                nameSpan.innerText = recipe.name;
-                nameContainer.appendChild(nameSpan);
-
-                const favBtn = document.createElement('button');
-                favBtn.className = `fav-btn ${recipe.favorite ? 'active' : ''}`;
-                favBtn.innerText = '❤';
-                favBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    recipe.favorite = !recipe.favorite;
-                    renderRecipes();
-                };
-                li.appendChild(nameContainer);
-                li.appendChild(favBtn);
-
-                const details = document.createElement('div');
-                details.className = 'recipe-details';
-                
-                // Create detailed ingredients list
-                const ingredientsList = document.createElement('ul');
-                ingredientsList.className = 'ingredients-list';
-                
-                const ingredientItems = recipe.ingredients.split(',').map(item => item.trim());
-                ingredientItems.forEach(item => {
-                    const ingLi = document.createElement('li');
-                    ingLi.innerText = item;
-                    ingredientsList.appendChild(ingLi);
-                });
-                
-                details.appendChild(ingredientsList);
-                
-                const info = document.createElement('p');
-                info.innerHTML = `Time: ${recipe.time} | Flies: ${recipe.flies}`;
-                details.appendChild(info);
-
-                li.appendChild(details);
-            });
-
-            list.appendChild(filteredRecipes); // This is a bug from previous step, it should be filteredRecipes.forEach
-            // Fixing the loop logic here
-            filteredRecipes.forEach(recipe => {
-                // The previous loop was already adding items, but I'm replacing the logic with a clean sweep
-            });
+            const header = document.createElement('div');
+            header.className = 'recipe-header';
+            header.innerHTML = `<img src="assets/berry_icon.png" class="berry-icon" alt="berry"> <strong>${recipe.name}</strong>`;
             
-            // Wait, I realized I made a mistake in the previous logic flow. Let me rewrite the renderRecipes loop properly.
+            const details = document.createElement('div');
+            details.className = 'recipe-details';
             
-            // Corrected renderRecipes logic
+            const ingredientsArray = recipe.ingredients.split(',').map(i => i.trim());
+            const ingredientsHtml = `<ul class="ingredients-list">${ingredientsArray.map(i => `<li>${i}</li>`).join('')}</ul>`;
             
+            details.innerHTML = `
+                <div><strong>Ingredients:</strong> ${ingredientsHtml}</div>
+                <div><strong>Time:</strong> ${recipe.time}</div>
+                <div><strong>Flies needed:</strong> ${recipe.flies}</div>
+            `;
+
+            item.appendChild(favBtn);
+            item.appendChild(header);
+            item.appendChild(details);
+            item.onclick = () => item.classList.toggle('active');
+
+            list.appendChild(item);
         });
+
+        catDiv.appendChild(list);
+        container.appendChild(catDiv);
     });
-}
 
-// Let me rewrite the renderRecipes function fully to ensure it's clean and bug-free
-function renderRecipes() {
-    const container = document.getElementById('categories-container');
-    container.innerHTML = '';
-
-    const categories = ['General', 'Foggy Day'];
-    
-    categories.forEach(cat => {
-        const filteredRecipes = recipes.filter(r => {
-            const matchesCategory = (currentFilter === 'All' || r.category === currentFilter);
-            const matchesSearch = r.name.toLowerCase().includes(currentSearch.toLowerCase()) || 
-                                r.ingredients.toLowerCase().includes(currentSearch.toLowerCase());
-            return matchesCategory && matchesSearch;
-        });
-
-        if (filteredRecipes.length > 0) {
-            const catDiv = document.createElement('div');
-            catDiv.className = `category-section ${cat === 'Foggy Day' ? 'category-foggy' : ''}`;
-            
-            const title = document.createElement('h2');
-            title.className = 'category-title';
-            title.innerText = cat;
-            catDiv.appendChild(title);
-
-            const list = document.createElement('ul');
-            list.className = 'recipe-list';
-
-            filteredRecipes.forEach(recipe => {
-                const li = document.createElement('li');
-                li.className = 'recipe-item';
-                li.onclick = () => li.classList.toggle('active');
-
-                const nameContainer = document.createElement('div');
-                nameContainer.style.display = 'flex';
-                nameContainer.style.alignItems = 'center';
-                nameContainer.style.gap = '8px';
-                
-                const icon = document.createElement('img');
-                icon.src = 'assets/berry_icon.png';
-                icon.className = 'berry-icon';
-                nameContainer.appendChild(icon);
-
-                const nameSpan = document.createElement('strong');
-                nameSpan.innerText = recipe.name;
-                nameContainer.appendChild(nameSpan);
-                nameContainer.appendChild(document.createElement('span')); // placeholder
-
-                const favBtn = document.createElement('button');
-                favBtn.className = `fav-btn ${recipe.favorite ? 'active' : ''}`;
-                favBtn.innerText = '❤';
-                favBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    recipe.favorite = !recipe.favorite;
-                    renderRecipes();
-                };
-                
-                li.appendChild(nameContainer);
-                li.appendChild(favBtn);
-
-                const details = document.createElement('div');
-                details.className = 'recipe-details';
-                
-                const ingredientsList = document.createElement('ul');
-                ingredientsList.className = 'ingredients-list';
-                
-                recipe.ingredients.split(',').forEach(item => {
-                    const ingLi = document.createElement('li');
-                    ingLi.innerText = item.trim();
-                    ingredientsList.appendChild(ingLi);
-                });
-                
-                details.appendChild(ingredientsList);
-                
-                const info = document.createElement('p');
-                info.innerHTML = `Time: ${recipe.time} | Flies: ${recipe.flies}`;
-                details.appendChild(info);
-
-                li.appendChild(details);
-            });
-            
-            // I accidentally forgot to append the items to the list
-            // Correcting that now
-            
-            // Actually, I'll just write the final clean version below
-        });
-    });
-}
-
-// I will provide the full script.js now to avoid confusion.
-
-function renderRecipes() {
-    const container = document.getElementById('categories-container');
-    container.innerHTML = '';
-
-    const categories = ['General', 'Foggy Day'];
-    
-    categories.forEach(cat => {
-        const filteredRecipes = recipes.filter(r => {
-            const matchesCategory = (currentFilter === 'All' || r.category === currentFilter);
-            const matchesSearch = r.name.toLowerCase().includes(currentSearch.toLowerCase()) || 
-                                r.ingredients.toLowerCase().includes(currentSearch.toLowerCase());
-            return matchesCategory && matchesSearch;
-        });
-
-        if (filteredRecipes.length > 0) {
-            const catDiv = document.createElement('div');
-            catDiv.className = `category-section ${cat === 'Foggy Day' ? 'category-foggy' : ''}`;
-            
-            const title = document.createElement('h2');
-            title.className = 'category-title';
-            title.innerText = cat;
-            catDiv.appendChild(title);
-
-            const list = document.createElement('ul');
-            list.className = 'recipe-list';
-
-            filteredRecipes.forEach(recipe => {
-                const li = document.createElement('li');
-                li.className = 'recipe-item';
-                li.onclick = () => li.classList.toggle('active');
-
-                const nameContainer = document.createElement('div');
-                nameContainer.style.display = 'flex';
-                nameContainer.style.alignItems = 'center';
-                nameContainer.style.gap = '8px';
-                
-                const icon = document.createElement('img');
-                icon.src = 'assets/berry_icon.png';
-                icon.className = 'berry-icon';
-                nameContainer.appendChild(icon);
-
-                const nameSpan = document.createElement('strong');
-                nameSpan.innerText = recipe.name;
-                nameContainer.appendChild(nameSpan);
-
-                const favBtn = document.createElement('button');
-                favBtn.className = `fav-btn ${recipe.favorite ? 'active' : ''}`;
-                favBtn.innerText = '❤';
-                favBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    recipe.favorite = !recipe.favorite;
-                    renderRecipes();
-                };
-                
-                li.appendChild(nameContainer);
-                li.appendChild(favBtn);
-
-                const details = document.createElement('div');
-                details.className = 'recipe-details';
-                
-                const ingredientsList = document.createElement('ul');
-                ingredientsList.className = 'ingredients-list';
-                
-                recipe.ingredients.split(',').forEach(item => {
-                    const ingLi = document.createElement('li');
-                    ingLi.innerText = item.trim();
-                    ingredientsList.appendChild(ingLi);
-                });
-                
-                details.appendChild(ingredientsList);
-                
-                const info = document.createElement('p');
-                info.innerHTML = `Time: ${recipe.time} | Flies: ${recipe.flies}`;
-                details.appendChild(info);
-
-                li.appendChild(details);
-                list.appendChild(li);
-            });
-            catDiv.appendChild(list);
-            container.appendChild(catDiv);
-        });
-    });
+    if (container.innerHTML === '') {
+        document.getElementById('no-results-message').style.display = 'block';
+    } else {
+        document.getElementById('no-results-message').style.display = 'none';
+    }
 }
 
 function addRecipe() {
@@ -287,59 +85,46 @@ function addRecipe() {
     const flies = document.getElementById('recipe-flies').value;
     const category = document.getElementById('recipe-category').value;
 
-    if (!name || !ingredients) {
-        alert('Please enter a name and ingredients!');
-        return;
+    if (name && ingredients) {
+        recipes.push({ name, ingredients, category, favorite: false, time, flies: parseInt(flies) || 0 });
+        renderRecipes();
+        document.getElementById('recipe-name').value = '';
+        document.getElementById('recipe-ingredients').value = '';
+        document.getElementById('recipe-time').value = '';
+        document.getElementById('recipe-flies').value = '';
     }
+}
 
-    recipes.push({
-        name: name,
-        ingredients: ingredients,
-        time: time,
-        flies: parseInt(flies) || 0,
-        category: category,
-        favorite: false
-    });
-
-    document.getElementById('recipe-name').value = '';
-    document.getElementById('recipe-ingredients').value = '';
-    document.getElementById('recipe-time').value = '';
-    document.getElementById('recipe-flies').value = '';
-    
+function toggleFavorite(recipe) {
+    recipe.favorite = !recipe.favorite;
     renderRecipes();
 }
 
 function filterRecipes() {
-    currentSearch = document.getElementById('recipe-search').value;
-    currentFilter = document.getElementById('category-filter').value;
     renderRecipes();
 }
 
 function clearFilters() {
-    currentSearch = '';
-    currentFilter = 'All';
     document.getElementById('recipe-search').value = '';
     document.getElementById('category-filter').value = 'All';
     renderRecipes();
 }
 
 function pickRandomRecipe() {
-    const filtered = recipes.filter(r => {
-        const matchesCategory = (currentFilter === 'All' || r.category === currentFilter);
-        const matchesSearch = r.name.toLowerCase().includes(currentSearch.toLowerCase()) || 
-                                r.ingredients.toLowerCase().includes(currentSearch.toLowerCase());
-        return matchesCategory && matchesSearch;
-    });
+    if (recipes.length === 0) return;
+    const randomIdx = Math.floor(Math.random() * recipes.length);
+    const randomRecipe = recipes[randomIdx];
     
-    if (filtered.length === 0) {
-        alert('No recipes to pick from!');
-        return;
-    }
-    
-    const randomRecipe = filtered[Math.floor(Math.random() * filtered.length)];
-    alert(`How about trying: ${randomRecipe.name}!`);
+    // We simulate the selection by clearing filters, then finding the item and clicking it
+    clearFilters();
+    setTimeout(() => {
+        const items = document.querySelectorAll('.recipe-item');
+        const recipeItems = Array.from(items).filter(item => item.innerText.includes(randomRecipe.name));
+        if (recipeItems.length > 0) {
+            recipeItems[0].classList.add('active');
+            recipeItems[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 50);
 }
 
-window.onload = () => {
-    renderRecipes();
-};
+window.onload = renderRecipes;
