@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Son's Berry Recipe Book</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=1.0, initial-scale=1.0">
+    <title>Son's Berry Recipe Book</title>	ext            <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
@@ -14,7 +13,7 @@
             <h3>Add a New Berry Recipe</h3>
             <input type="text" id="recipe-name" placeholder="Recipe Name">
             <textarea id="recipe-ingredients" placeholder="Ingredients (like berries and flies)" rows="3"></textarea>
-            <input type="text" id="recipe-time" placeholder="Cooking Time (e.g. 10 mins)">
+            <input type "text" id="recipe-time" placeholder="Cooking Time (e.g. 10 mins)">
             <input type="number" id="recipe-flies" placeholder="Number of Flies needed">
             <select id="recipe-category">
                 <option value="General">General</option>
@@ -27,11 +26,12 @@
             <input type="text" id="recipe-search" placeholder="Search berries or ingredients..." oninput="filterRecipes()">
             <select id="category-filter" onchange="filterRecipes()">
                 <option value="All">All Categories</option>
-                <option value="option-1">General</option>
-                <option value="option-2">Foggy Day</option>
+                <option value="General">General</option>
+                <option value="Foggy Day">Foggy Day</option>
             </select>
             <button id="random-recipe-btn" onclick="pickRandomRecipe()">Random Recipe!</button>
             <button id="clear-filter-btn" onclick="clearFilters()">Clear Filters</button>
+        category-container
         </div>
 
         <div id="no-results-message" style="display: none; text-align: center; color: #b22222; margin: 20px 0; font-style: italic;">
@@ -51,6 +51,7 @@
             <ul id="shopping-list">
                 <!-- Shopping items will be added here -->
             </ul>
+            <button id="clear-shopping-btn" onclick="clearShoppingList()">Clear All</button>
         </div>
     </div>
 
