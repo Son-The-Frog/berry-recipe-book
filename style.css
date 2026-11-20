@@ -65,8 +65,7 @@ h1 {
     gap: 10px;
     align-items: center;
 }
-.search-container input {
-    flex: 1;
+.search-container input, .search-container select {
     box-sizing: border-box;
     padding: 12px;
     border: 2px solid #f8d7da;
@@ -76,7 +75,10 @@ h1 {
     outline: none;
     transition: 0.3s;
 }
-.search-container input:focus {
+.search-container input {
+    flex: 1;
+}
+.search-container input:focus, .search-container select:focus {
     border-color: #b22222;
     box-shadow: 0 0 5px rgba(178, 34, 34, 0.3);
 }
@@ -193,13 +195,6 @@ h1 {
 @keyframes highlight-fade {
     0% { transform: scale(1.05); }
     100% { transform: scale(1); }
-}
-.click-bounce {
-    animation: bounce 0.3s ease-in-out;
-}
-@keyframes bounce {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(0.95); }
 }
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
