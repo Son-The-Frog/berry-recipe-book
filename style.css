@@ -196,13 +196,70 @@ h1 {
 }
 .category-foggy .recipe-item {
     background: #fdfaf0;
-    border-color: #c0c0c0;
 }
-.category-foggy .recipe-item:hover {
-    background: #f5f5f5;
+.shopping-list-section {
+    margin-top: 30px;
+    padding: 20px;
+    background: #fff5f5;
+    border-radius: 15px;
+    border: 2px solid #f8d7da;
 }
-.category-foggy .recipe-details {
-    border-top-color: #b0c4de;
+.shopping-input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.shopping-input-group input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #f8d7da;
+    border-radius: 5px;
+}
+.shopping-input-group button {
+    background-color: #b22222;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+#shopping-list {
+    list-style: none;
+    padding: 0;
+}
+.shopping-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f8d7da;
+    color: #5d4037;
+}
+.shopping-item:last-child {
+    border-bottom: none;
+}
+.shopping-item input[type="checkbox"] {
+    cursor: pointer;
+    accent-color: #b22222;
+    width: 18px;
+    height: 18px;
+}
+.shopping-item.bought {
+    color: #a0a0a0;
+    text-decoration: line-through;
+}
+.remove-shopping-btn {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: #cd5c5c;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+}
+.remove-shopping-btn:hover {
+    color: #b22222;
 }
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }

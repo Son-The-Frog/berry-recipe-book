@@ -2,14 +2,14 @@ let recipes = [];
 let shoppingList = [];
 
 function init() {
-    const savedRecipes = localStorage.getItem('berryRecipes');
+    const savedRecipes = localStorage.getItem('son_berry_recipes');
     if (savedRecipes) {
         recipes = JSON.parse(savedRecipes);
     }
 
-    const savedShoppingList = localStorage.getItem('berryShoppingList');
-    if (savedShoppingList) {
-        shoppingList = JSON.parse(savedShoppingList);
+    const savedShopping = localStorage.getItem('son_berry_shopping');
+    if (savedShopping) {
+        shoppingList = JSON.parse(savedShopping);
     }
 
     renderRecipes();
@@ -24,293 +24,162 @@ function addRecipe() {
     const category = document.getElementById('recipe-category').value;
 
     if (!name || !ingredients) {
-        alert('Please add a name and some berries!');
+        alert('Please enter a name and ingredients!');
+        return;
     }
-    if (!name || !ingredients) return;
 
-    const newRecipe = {
+    const recipe = {
         id: Date.now(),
-        name, ingredients, time, flies, category
+        name,
+        ingredients: ingredients.split(',').map(i => i.trim()),
+        time,
+        flies,
+        category,
+        isFavorite: false
     };
 
-    recipes.push(newRecipe);
-    saveRecipes();
-    renderRecipes();
+    recipes.push(recipe);
+    saveAndRender();
     
-    // Clear inputs
     document.getElementById('recipe-name').value = '';
     document.getElementById('recipe-ingredients').value = '';
     document.getElementById('recipe-time').value = '';
     document.getElementById('recipe-flies').value = '';
 }
 
-function saveRecipes() {
-    localStorage.setItem('berryRecipes', JSON.stringify(recipes));
-}
-
-function renderRecipes() {
-    const container = document.getElementById('categories-container');
-    container.innerHTML = '';
-
-    const categories = [...new Set(recipes.map(r => r.category))];
-    
-    categories.forEach(cat => {
-        const catDiv = document.createElement('div');
-        catDiv.className = `category-section ${cat === 'Foggy Day' ? 'category-foggy' : ''}`;
-        
-        const title = document.createElement('h3');
-        title.className = 'category-title';
-        title.title = 'Click to collapse/expand';
-        title.textContent = cat;
-        title.onclick = () => {
-            const list = catDiv.querySelector('.recipe-list');
-            list.style.display = list.style.display === 'none' ? 'block' : 'none';
-        };
-        
-        catDiv.appendChild(title);
-        
-        const list = document.createElement('ul');
-        list.className = 'recipe-list';
-        
-        recipes.filter(r => r.category === cat).forEach(r => {
-            const li = document.createElement('li');
-            li.className = 'recipe-item';
-            li.onclick = (e) => {
-                if (e.target.classList.contains('fav-btn')) return;
-                toggleRecipeDetails(li);
-            };
-            
-            const favBtn = document.createElement('button');
-            favBtn.className = 'fav-btn';
-            favBtn.onclick = (e) => {
-                e.stopPropagation();
-                toggleFavorite(r.id);
-            };
-            
-            // Check if favorite
-            const isFav = localStorage.getItem(`fav-${r.id}`);
-            favBtn.innerHTML = isFav ? '❤️' : '🤍';
-            favBtn.classList.toggle('active', !!isFav);
-            
-            li.appendChild(favBtn);
-            
-            const content = document.createElement('div');
-            content.innerHTML = `<strong>${r.name}</strong>`;
-            li.appendChild(content);
-            
-            const details = document.createElement('div');
-            details.className = 'recipe-details';
-            details.innerHTML = `
-                <ul class="ingredients-list">
-                    ${r.ingredients.split('\n').map(i => `<li>${i}</li>`).join('')}
-                </ul>
-                <p>Time: ${r.time} | Flies: ${r.flies}</p>
-            `;
-            li.appendChild(details);
-            
-            // Add to shopping list button
-            const shopBtn = document.createElement('button');
-            shopBtn.className = 'shop-btn';
-            shopBtn.textContent = 'Add Ingredients to List';
-            shopBtn.onclick = (e) => {
-                e.stopPropagation();
-                addIngredientsToShoppingList(r.ingredients);
-            };
-            details.appendChild(shopBtn);
-            
-            li.appendChild(details);
-        });
-        
-        catDiv.appendChild(list);
-        catDiv.appendChild(title);
-    });
-    
-    // Fix duplicate title for some reason
-    const firstTitle = container.querySelector('.category-title');
-    if (firstTitle) {
-        // I just want one title per category
+function toggleFavorite(id, event) {
+    event.stopPropagation();
+    const recipe = recipes.find(r => r.id === id);
+    if (recipe) {
+        recipe.isFavorite = !recipe.isFavorite;
+        saveAndRender();
     }
 }
 
-function toggleRecipeDetails(el) {
-    el.classList.toggle('active');
-}
-
-function toggleFavorite(id) {
-    const isFav = localStorage.getItem(`fav-${id}`);
-    if (isFav) {
-        localStorage.removeItem(`fav-${id}`);
-    } else {
-        localStorage.setItem(`fav-${id}`, 'true');
-    }
-    renderRecipes();
-}
-
-function filterRecipes() {
-    const search = document.getElementById('recipe-search').value.toLowerCase();
-    const category = document.getElementById('category-filter').value;
-
-    const filtered = recipes.filter(r => {
-        const matchSearch = r.name.toLowerCase().includes(search) || 
-                        r.ingredients.toLowerCase().includes(search);
-        const matchCat = (category === 'All') ? true : (r.category === category);
-        return matchSearch && matchCat;
-    });
-
-    // Temporarily store non-filtered recipes to keep track of IDs
-    // But we need a render function that accepts a filter
-    renderRecipesFiltered(filtered);
-}
-
-function renderRecipesFiltered(filteredRecipes) {
+function renderRecipes(filteredRecipes = recipes) {
     const container = document.getElementById('categories-container');
     container.innerHTML = '';
 
     const categories = [...new Set(filteredRecipes.map(r => r.category))];
-    
+
     categories.forEach(cat => {
         const catDiv = document.createElement('div');
-        catDiv.className = `category-section ${cat === 'Foggy Day' ? 'category-foggy' : ''}`;
+        catDiv.className = cat === 'Foggy Day' ? 'category-foggy' : '';
         
         const title = document.createElement('h3');
         title.className = 'category-title';
-        title.textContent = cat;
+        title.title = 'Click to filter';
+        title.innerText = cat;
         catDiv.appendChild(title);
-        
+
         const list = document.createElement('ul');
         list.className = 'recipe-list';
-        
-        filteredRecipes.filter(r => r.category === cat).forEach(r => {
-            const li = document.createElement('li');
-            li.className = 'recipe-item';
-            li.onclick = (e) => {
-                if (e.target.classList.contains('fav-btn')) return;
-                toggleRecipeDetails(li);
-            };
+
+        filteredRecipes.filter(r => r.category === cat).forEach(recipe => {
+            const item = document.createElement('li');
+            item.className = 'recipe-item';
+            item.onclick = () => item.classList.toggle('active');
             
-            const favBtn = document.createElement('button');
-            favBtn.className = 'fav-btn';
-            favBtn.onclick = (e) => {
-                e.stopPropagation();
-                toggleFavorite(r.id);
-            };
-            const isFav = localStorage.getItem(`fav-${r.id}`);
-            favBtn.innerHTML = isFav ? '❤️' : '🤍';
-            favBtn.classList.toggle('active', !!isFav);
-            li.appendChild(favBtn);
-            
-            const content = document.createElement('div');
-            content.innerHTML = `<strong>${r.name}</strong>`;
-            li.appendChild(content);
-            
-            const details = document.createElement('div');
-            details.className = 'recipe-details';
-            details.innerHTML = `
-                <ul class="ingredients-list">
-                    ${r.ingredients.split('\n').map(i => `<li>${i}</li>`).join('')}
-                </ul>
-                <p>Time: ${r.time} | Flies: ${r.flies}</p>
+            item.innerHTML = `
+                <strong>${recipe.name}</strong>
+                <button class="fav-btn ${recipe.isFavorite ? 'active' : ''}" onclick="toggleFavorite(${recipe.id}, event)">❤</button>
+                <div class="recipe-details">
+                    <p>Time: ${recipe.time || 'Not set'} | Flies: ${recipe.flies || '0'}</p>
+                    <ul class="ingredients-list">
+                        ${recipe.ingredients.map(ing => `<li>${ing}</li>`).join('')}
+                    </ul>
+                </div>
             `;
-            li.appendChild(details);
-            
-            const shopBtn = document.createElement('button');
-            shopBtn.className = 'shop-btn';
-            shopBtn.textContent = 'Add Ingredients to List';
-            shopBtn.onclick = (e) => {
-                e.stopPropagation();
-                addIngredientsToShoppingList(r.ingredients);
-            };
-            details.appendChild(shopBtn);
-            
-            li.appendChild(details);
+            list.appendChild(item);
         });
-        
+
         catDiv.appendChild(list);
-        catDiv.appendChild(title);
+        container.appendChild(catDiv);
     });
 }
 
-function pickRandomRecipe() {
-    const filtered = recipes.length > 0 ? recipes : [];
-    if (recipes.length === 0) {
-        alert('No recipes to pick from!');
-        return;
+function filterRecipes() {
+    const searchTerm = document.getElementById('recipe-search').value.toLowerCase();
+    const categoryFilter = document.getElementById('category-filter').value;
+
+    const filtered = recipes.filter(r => {
+        const matchesSearch = r.name.toLowerCase().includes(searchTerm) || 
+                             r.ingredients.some(i => i.toLowerCase().includes(searchTerm));
+        const matchesCategory = categoryFilter === 'All' || 
+                                (categoryFilter === 'option-1' && r.category === 'General') || 
+                                (categoryFilter === 'option-2' && r.category === 'Foggy Day');
+        return matchesSearch && matchesCategory;
+    });
+
+    if (filtered.length === 0) {
+        document.getElementById('no-results-message').style.display = 'block';
+    } else {
+        document.getElementById('no-results-message').style.display = 'none';
     }
-    const randomRecipe = recipes[Math.floor(Math.random() * recipes.length)];
-    
-    // We can't easily highlight it since we render based on filters
-    alert(`Today's random pick: ${randomRecipe.name}!`);
+
+    renderRecipes(filtered);
 }
 
 function clearFilters() {
     document.getElementById('recipe-search').value = '';
     document.getElementById('category-filter').value = 'All';
-    renderRecipes();
+    filterRecipes();
+}
+
+function pickRandomRecipe() {
+    if (recipes.length === 0) return;
+    const randomIdx = Math.floor(Math.random() * recipes.length);
+    const recipe = recipes[randomIdx];
+    
+    document.getElementById('recipe-search').value = recipe.name;
+    filterRecipes();
 }
 
 function addToShoppingList() {
     const input = document.getElementById('shopping-item-input');
-    const item = input.value.trim();
-    if (item) {
-        shoppingList.push(item);
-        saveShoppingList();
-        renderShoppingList();
+    const itemText = input.value.trim();
+    
+    if (itemText) {
+        shoppingList.push({ text: itemText, bought: false });
+        saveShoppingAndRender();
         input.value = '';
     }
 }
 
-function addIngredientsToShoppingList(ingredientsText) {
-    const ingredients = ingredientsText.split('\n');
-    ingredients.forEach(i => {
-        if (i.trim()) {
-            shoppingList.push(i.trim());
-        }
-    });
-    saveShoppingList();
-    renderShoppingList();
+function removeFromShoppingList(index) {
+    shoppingList.splice(index, 1);
+    saveShoppingAndRender();
 }
 
-function saveShoppingList() {
-    localStorage.setItem('berryShoppingList', JSON.stringify(shoppingList));
+function toggleShoppingItem(index) {
+    shoppingList[index].bought = !shoppingList[index].bought;
+    saveShoppingAndRender();
 }
 
 function renderShoppingList() {
-    const listEl = document.getElementById('shopping-list');
-    listEl.innerHTML = '';
+    const listElement = document.getElementById('shopping-list');
+    listElement.innerHTML = '';
 
     shoppingList.forEach((item, index) => {
         const li = document.createElement('li');
-        li.textContent = item;
+        li.className = `shopping-item ${item.bought ? 'bought' : ''}`;
         
-        const removeBtn = document.createElement('button');
-        removeBtn.className = 'remove-shopping-btn';
-        removeBtn.textContent = '✕';
-        removeBtn.onclick = () => removeShoppingItem(index);
-        
-        li.appendChild(removeBtn);
-        li.classList.add('shopping-item');
-    });
-    
-    // I forgot to add the items to the list! 
-    // Let's fix that.
-    shoppingList.forEach((item, index) => {
-        const li = document.createElement('li');
-        li.className = 'shopping-item';
-        li.textContent = item;
-        
-        const removeBtn = document.createElement('button');
-        removeBtn.className = 'remove-shopping-btn';
-        removeBtn.textContent = '✕';
-        removeBtn.onclick = () => removeShoppingItem(index);
-        
-        li.appendChild(removeBtn);
-        listEl.appendChild(li);
+        li.innerHTML = `
+            <input type="checkbox" ${item.bought ? 'checked' : ''} onchange="toggleShoppingItem(${index})">
+            <span>${item.text}</span>
+            <button class="remove-shopping-btn" onclick="removeFromShoppingList(${index})">Remove</button>
+        `;
+        listElement.appendChild(li);
     });
 }
 
-function removeShoppingItem(index) {
-    shoppingList.splice(index, 1);
-    saveShoppingList();
+function saveAndRender() {
+    localStorage.setItem('son_berry_recipes', JSON.stringify(recipes));
+    renderRecipes();
+}
+
+function saveShoppingAndRender() {
+    localStorage.setItem('son_berry_shopping', JSON.stringify(shoppingList));
     renderShoppingList();
 }
 
