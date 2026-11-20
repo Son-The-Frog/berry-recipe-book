@@ -140,7 +140,7 @@ h1 {
 .recipe-details {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.3s ease-out;
+    transition: max-height 0.5s ease-out, padding 0.3s ease-out, opacity 0.3s ease-out;
     padding: 0 0 0 10px;
     color: #6d4c41;
     font-style: italic;
@@ -149,11 +149,21 @@ h1 {
     opacity: 0;
 }
 .recipe-item.active .recipe-details {
-    max-height: 100px;
+    max-height: 500px;
     padding: 10px 0 0 10px;
     border-top: 1px dashed #d2b48c;
     margin-top: 10px;
     opacity: 1;
+}
+.ingredients-list {
+    margin: 8px 0;
+    padding-left: 20px;
+    list-style-type: disc;
+    font-style: normal;
+    color: #8d6e63;
+}
+.ingredients-list li {
+    margin-bottom: 4px;
 }
 .fav-btn {
     position: absolute;
@@ -195,6 +205,6 @@ h1 {
     border-top-color: #b0c4de;
 }
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
